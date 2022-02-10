@@ -1,78 +1,35 @@
 //Requires
 const express = require("express");
 const chargepointSchema = require("../models/chargepoint");
+const {
+  getAll,
+  insert,
+  getByID,
+  updateByID,
+  logicalDeleteByID,
+} = require("../utils/chargepoint");
 
 //Initializations
 const router = express.Router();
 
-// create chargepoint
 router.post("/chargepoint", (req, res) => {
-  const chargepoint = chargepointSchema(req.body);
-  chargepoint
-    .save()
-    .then((data) =>
-      res.json({
-        message: `Chargepoint creado correctamente!`,
-        data: data,
-      })
-    )
-    .catch((error) => res.json({ message: error }));
+  insert(req, res);
 });
 
-// get all chargepoints where deleted_at is NULL
 router.get("/chargepoint", (req, res) => {
-  chargepointSchema
-    .find({ deleted_at: null })
-    .then((data) =>
-      res.json({
-        message: `Información recibida correctamente!`,
-        data: data,
-      })
-    )
-    .catch((error) => res.json({ message: error }));
+  getAll(req, res);
 });
 
-// get a chargepoint
 router.get("/chargepoint/:id", (req, res) => {
-  const { id } = req.params;
-  chargepointSchema
-    .find({ id })
-    .then((data) =>
-      res.json({
-        message: `Información recibida correctamente!`,
-        data: data,
-      })
-    )
-    .catch((error) => res.json({ message: error }));
+  getByID(req, res);
 });
 
-// update a chargepoint
 router.put("/chargepoint/:id", (req, res) => {
-  const { id } = req.params;
-  const { name, status } = req.body;
-  chargepointSchema
-    .updateOne({ id }, { $set: { name, status } })
-    .then((data) =>
-      res.json({
-        message: `Checkpoint modificado correctamente!`,
-        data: data,
-      })
-    )
-    .catch((error) => res.json({ message: error }));
+  updateByID(req, res);
 });
 
-// delete a chargepoint
 router.delete("/chargepoint/:id", (req, res) => {
-  const { id } = req.params;
-  chargepointSchema
-    .updateOne({ id }, { $set: { deleted_at: new Date() } })
-    .then((data) =>
-      res.json({
-        message: `Checkpoint elimnado correctamente!`,
-        data: data,
-      })
-    )
-    .catch((error) => res.json({ message: error }));
+  logicalDeleteByID(req, res);
 });
 
 module.exports = router;
