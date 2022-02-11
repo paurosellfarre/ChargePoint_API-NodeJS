@@ -48,29 +48,38 @@ exports.updateByID = (req, res) => {
   const { id } = req.params;
   const { name, status } = req.body;
 
-  //Validamos que el estado actual no sea igual al estado nuevo
-  chargepointSchema
-    .find({ id })
-    .then((data) => {
-      const lastStatus = data[0].status;
-      if (lastStatus == status) {
-        res.json({
-          message: `Error: El Chargepoint ya tiene el estado que intenta insertar`,
-        });
-      } else {
-        chargepointSchema
-          .updateOne({ id }, { $set: { name, status } })
-          .then((data) => {
-            res.json({
-              message: `Checkpoint modificado correctamente!`,
-              data: data,
-            }),
-              ws_emiter(id, name, status, lastStatus);
-          })
-          .catch((error) => res.json({ message: error }));
-      }
-    })
-    .catch((error) => res.json({ message: error }));
+  //Validamos que el estado que se intenta insertar sea valido
+  const validStatus = ["ready", "charging", "waiting", "error"];
+  if(validStatus.includes(status)){
+
+    //Validamos que el estado actual no sea igual al estado nuevo
+    chargepointSchema
+      .find({ id })
+      .then((data) => {
+        const lastStatus = data[0].status;
+        if (lastStatus == status) {
+          res.json({
+            message: `Error: El Chargepoint ya tiene el estado que intenta insertar`,
+          });
+        } else {
+          chargepointSchema
+            .updateOne({ id }, { $set: { name, status } })
+            .then((data) => {
+              res.json({
+                message: `Checkpoint modificado correctamente!`,
+                data: data,
+              }),
+                ws_emiter(id, name, status, lastStatus);
+            })
+            .catch((error) => res.json({ message: error }));
+        }
+      })
+      .catch((error) => res.json({ message: error }));
+  }else {
+    res.json({
+      message: `Error: El estado que intenta insertar no es valido.`,
+    });
+  }
 };
 
 // delete a chargepoint
